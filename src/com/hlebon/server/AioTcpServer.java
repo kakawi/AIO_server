@@ -1,9 +1,10 @@
 package com.hlebon.server;
 
-import AIO.message.LoginMessage;
-import AIO.messageHandlers.LoginMessageHandler;
-import AIO.messageHandlers.MessageHandler;
-import AIO.messageHandlers.ReceivedMessageHandlerThread;
+
+import com.hlebon.message.LoginMessage;
+import com.hlebon.messageHandlers.LoginMessageHandler;
+import com.hlebon.messageHandlers.MessageHandler;
+import com.hlebon.messageHandlers.ReceivedMessageHandlerThread;
 
 import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousChannelGroup;

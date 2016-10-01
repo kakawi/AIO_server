@@ -14,12 +14,9 @@ public class AioConnectHandler implements CompletionHandler<Void,AsynchronousSoc
     @Override
     public void completed(Void attachment, AsynchronousSocketChannel connector) {
 //        try {
-            // 向连接号的通道发起异步写????????????????????
 //            connector.write(
 //                    ByteBuffer.wrap(String.valueOf(content).getBytes())
 //            ).get();
-
-            // 向连接好的通道发起异步读
             startRead(connector);
 //        }
     }

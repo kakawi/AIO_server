@@ -1,8 +1,9 @@
 package com.hlebon.server;
 
-import AIO.message.Message;
-import AIO.message.MessageWrapper;
-import AIO.messageHandlers.ReceivedMessageHandlerThread;
+
+import com.hlebon.message.Message;
+import com.hlebon.message.MessageWrapper;
+import com.hlebon.messageHandlers.ReceivedMessageHandlerThread;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -50,8 +50,6 @@ public class AioReadReadyServerHandler implements CompletionHandler<Integer,Byte
                 e.printStackTrace();
             }
         }
-
-        // 读到0个字节, 不再重新发起异步读了!!!!!!!!!!!!!!
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.hlebon.messageHandlers;
 
-import AIO.message.MessageWrapper;
+import com.hlebon.message.MessageWrapper;
 
 public interface MessageHandler {
     void handle(MessageWrapper messageWrapper);

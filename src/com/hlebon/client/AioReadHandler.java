@@ -9,7 +9,6 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 
-// 读到的字节数 + attachment
 public class AioReadHandler implements CompletionHandler<Integer,ByteBuffer>
 {
     private AsynchronousSocketChannel socket;

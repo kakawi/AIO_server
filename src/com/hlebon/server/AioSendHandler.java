@@ -27,7 +27,6 @@ public class AioSendHandler implements CompletionHandler
                 e.printStackTrace();
             }
         }
-
     }
 
     @Override

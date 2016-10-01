@@ -1,9 +1,10 @@
 package com.hlebon.messageHandlers;
 
-import AIO.message.LoginMessage;
-import AIO.message.Message;
-import AIO.message.MessageWrapper;
-import AIO.server.SenderService;
+
+import com.hlebon.message.LoginMessage;
+import com.hlebon.message.Message;
+import com.hlebon.message.MessageWrapper;
+import com.hlebon.server.SenderService;
 
 public class LoginMessageHandler implements MessageHandler {
     private SenderService senderService;

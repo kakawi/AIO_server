@@ -1,6 +1,6 @@
 package com.hlebon.server;
 
-import AIO.messageHandlers.ReceivedMessageHandlerThread;
+import com.hlebon.messageHandlers.ReceivedMessageHandlerThread;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

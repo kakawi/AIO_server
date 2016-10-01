@@ -1,6 +1,9 @@
 package com.hlebon.client;
 
-import AIO.message.*;
+
+import com.hlebon.message.LoginMessage;
+import com.hlebon.message.Message;
+import com.hlebon.message.StaticMessages;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,20 +27,15 @@ public class AioTcpClient {
     public static JTextField jt=new JTextField();
     public static ConcurrentHashMap<String,AsynchronousSocketChannel> sockets =new ConcurrentHashMap<>();
 
-    // 客户端静态对象
     static AioTcpClient me;
 
-    // 异步通道管理器
     private AsynchronousChannelGroup asyncChannelGroup;
 
-    // 构造函数初始化异步通道管理器
     public AioTcpClient() throws Exception {
-        //创建线程池 && 异步通道管理器
         ExecutorService executor = Executors.newFixedThreadPool(20);
         asyncChannelGroup = AsynchronousChannelGroup.withThreadPool(executor);
     }
 
-    // GBK解码器
     private final CharsetDecoder decoder = Charset.forName("GBK").newDecoder();
 
     public void start(final String ip, final int port) throws Exception {
