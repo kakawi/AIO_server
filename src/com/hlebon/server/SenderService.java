@@ -3,7 +3,6 @@ package com.hlebon.server;
 
 import com.hlebon.message.Message;
 import com.hlebon.message.MessageWrapper;
-import com.hlebon.message.StaticMessages;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,12 +41,10 @@ public class SenderService implements Runnable {
             try {
                 byte[] objectInByte = toByte(message);
                 int length = objectInByte.length;
-                String sendString = "sizeNextObject:" + length + StaticMessages.THE_END_FROM_CLIENT;
-                ByteBuffer objectSizeBuffer = ByteBuffer.wrap(sendString.getBytes("UTF-8"));
-                socket.write(objectSizeBuffer);
-
-                ByteBuffer readyBuffer = ByteBuffer.allocate(StaticMessages.READY_FROM_SERVER.length());
-                socket.read(readyBuffer, readyBuffer, new AioReadReadyServerHandler(socket, objectInByte));
+                ByteBuffer byteBuffer = ByteBuffer.allocate(length + 1);
+                byteBuffer.put(objectInByte);
+                byteBuffer.put((byte)'\r');
+                socket.write(byteBuffer);
             } catch (IOException e) {
                 e.printStackTrace();
             }

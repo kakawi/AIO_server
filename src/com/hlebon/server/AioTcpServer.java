@@ -2,9 +2,11 @@ package com.hlebon.server;
 
 
 import com.hlebon.message.LoginMessage;
+import com.hlebon.message.SayMessage;
 import com.hlebon.messageHandlers.LoginMessageHandler;
 import com.hlebon.messageHandlers.MessageHandler;
 import com.hlebon.messageHandlers.ReceivedMessageHandlerThread;
+import com.hlebon.messageHandlers.SayMessageHandler;
 
 import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousChannelGroup;
@@ -45,6 +47,7 @@ public class AioTcpServer implements Runnable {
 
         Map<Class, MessageHandler> messageHandlers = new HashMap<>();
         messageHandlers.put(LoginMessage.class, new LoginMessageHandler(senderService));
+        messageHandlers.put(SayMessage.class, new SayMessageHandler(senderService));
 
         ReceivedMessageHandlerThread receivedMessageHandlerThread = new ReceivedMessageHandlerThread(messageHandlers);
         new Thread(receivedMessageHandlerThread).start();

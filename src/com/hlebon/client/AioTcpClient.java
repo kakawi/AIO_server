@@ -3,7 +3,6 @@ package com.hlebon.client;
 
 import com.hlebon.message.LoginMessage;
 import com.hlebon.message.Message;
-import com.hlebon.message.StaticMessages;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,9 +16,7 @@ import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,17 +69,25 @@ public class AioTcpClient {
 
         // MY
         try {
-            LoginMessage loginMessage = new LoginMessage();
-            byte[] objectInByte = toByte(loginMessage);
+//            Message message = new SayMessage();
+            Message message = new LoginMessage();
 
-            int length = objectInByte.length;
-            String sendString = "sizeNextObject:" + length + StaticMessages.THE_END_FROM_CLIENT;
-            ByteBuffer objectSizeBuffer = ByteBuffer.wrap(sendString.getBytes("UTF-8"));
-            socket.write(objectSizeBuffer);
+            byte[] objectInByte = toByte(message);
 
-            ByteBuffer readyBuffer = ByteBuffer.allocate(StaticMessages.READY_FROM_SERVER.length());
-            socket.read(readyBuffer, readyBuffer, new AioReadReadyHandler(socket, objectInByte));
-        } catch (IOException e) {
+            ByteBuffer byteBuffer = ByteBuffer.allocate(objectInByte.length + 2);
+            byteBuffer.put(objectInByte);
+            byteBuffer.put((byte)-1);
+            byteBuffer.put((byte)-1);
+
+            for (int i = 0; i < 1000000; i++) {
+                byteBuffer.rewind();
+                do {
+                    Future<Integer> future = socket.write(byteBuffer);
+                    Integer answer = future.get();
+                    System.out.println(i + " Answer = " + answer);
+                } while (byteBuffer.position() < byteBuffer.limit());
+            }
+        } catch (IOException | InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
     }

@@ -1,21 +1,27 @@
 package com.hlebon.server;
 
-import com.hlebon.message.StaticMessages;
+import com.hlebon.message.Message;
+import com.hlebon.message.MessageWrapper;
 import com.hlebon.messageHandlers.ReceivedMessageHandlerThread;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AioReadHandler implements CompletionHandler<Integer,ByteBuffer> {
     private ReceivedMessageHandlerThread receivedMessageHandlerThread;
     private AsynchronousSocketChannel socket;
     private CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
-    public  String msg;
-    StringBuilder stringBuilder = new StringBuilder();
+    private List<Byte> poolByte = new ArrayList<>();
+    private int counter;
 
     public AioReadHandler(AsynchronousSocketChannel socket, ReceivedMessageHandlerThread receivedMessageHandlerThread) {
         this.receivedMessageHandlerThread = receivedMessageHandlerThread;
@@ -26,49 +32,34 @@ public class AioReadHandler implements CompletionHandler<Integer,ByteBuffer> {
     public void completed(Integer i, ByteBuffer buffer) {
         if (i > 0) {
             buffer.flip();
-            try {
-                msg = decoder.decode(buffer).toString();
-                System.out.println("Socket:/" + socket.getRemoteAddress().toString() + "/:FROM CLIENT " + msg);
-            } catch (IOException e) {
-                e.printStackTrace();
+            for (int j = 0; j < buffer.limit(); j++) {
+                byte currentByte = buffer.get(j);
+                if (currentByte == -1 && poolByte.get(poolByte.size() - 1) == -1) {
+                    System.out.println(counter++);
+                    poolByte.remove(poolByte.size() - 1);
+                    byte[] messageFromByte = new byte[poolByte.size()];
+                    for (int k = 0; k < poolByte.size(); k++) {
+                        messageFromByte[k] = poolByte.get(k);
+                    }
+
+                    try {
+                        Object object = toObject(messageFromByte);
+                        if (object instanceof Message) {
+                            Message message = (Message) object;
+                            MessageWrapper messageWrapper = new MessageWrapper(message, socket);
+                            receivedMessageHandlerThread.addMessageToHandle(messageWrapper);
+                            System.out.println(message);
+                        }
+                        poolByte.clear();
+                    } catch (IOException | ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    poolByte.add(currentByte);
+                }
             }
-
-            if (msg.contains(StaticMessages.THE_END_FROM_CLIENT)) {
-                int length = Integer.parseInt(msg.split(":")[1]);
-                ByteBuffer readyBuffer = ByteBuffer.wrap(StaticMessages.READY_FROM_SERVER.getBytes());
-                socket.write(readyBuffer);
-                buffer.clear();
-                BufferContainer bufferContainer = new BufferContainer(socket, ByteBuffer.allocate(length));
-                socket.read(bufferContainer.getBuffer(), bufferContainer, new AioObjectHandler(socket, receivedMessageHandlerThread, length));
-            } else {
-                socket.read(buffer, buffer, this);
-            }
-
-
-
-//            if(stringBuilder.toString().contains("BBYYEE")) {
-//                // 将读到的数据echo回客户端
-//                try {
-//                buf.rewind();
-//                String sendString="服务器回应,你输出的是:"+stringBuilder.toString();
-//                stringBuilder.setLength(0);
-//                ByteBuffer clientBuffer=ByteBuffer.wrap(sendString.getBytes("UTF-8"));
-//                clientBuffer.put(ByteBuffer.wrap(sendString.getBytes("UTF-8")));
-//                clientBuffer.rewind();
-//                // 发起异步写
-//                // 第一个参数为写的buffer
-//                // 第二个参数为attachment
-//                // 第三个参数为CompletionHandler,
-//                System.out.println("SLEEP 2s");
-//                Thread.sleep(2000);
-//                socket.write(clientBuffer, clientBuffer, new AioWriteHandler(socket));
-//                } catch (UnsupportedEncodingException ex) {
-//                    Logger.getLogger(AioReadHandler.class.getName()).log(Level.SEVERE, null, ex);
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-
+            buffer.clear();
+            socket.read(buffer, buffer, this);
         }
         else if (i == -1) {
             try {
@@ -83,6 +74,15 @@ public class AioReadHandler implements CompletionHandler<Integer,ByteBuffer> {
     @Override
     public void failed(Throwable exc, ByteBuffer attachment) {
         System.out.println("cancelled");
+    }
+
+    private static Object toObject(byte[] bytes) throws IOException, ClassNotFoundException {
+        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+        ObjectInput in;
+
+        in = new ObjectInputStream(bis);
+        Object o = in.readObject();
+        return o;
     }
 
 }
