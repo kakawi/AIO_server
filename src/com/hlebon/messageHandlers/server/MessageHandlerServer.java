@@ -1,7 +1,7 @@
-package com.hlebon.messageHandlers;
+package com.hlebon.messageHandlers.server;
 
 import com.hlebon.message.MessageWrapper;
 
-public interface MessageHandler {
+public interface MessageHandlerServer {
     void handle(MessageWrapper messageWrapper);
 }

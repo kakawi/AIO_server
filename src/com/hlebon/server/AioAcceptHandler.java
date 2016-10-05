@@ -1,7 +1,5 @@
 package com.hlebon.server;
 
-import com.hlebon.messageHandlers.ReceivedMessageHandlerThread;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousServerSocketChannel;
@@ -9,19 +7,18 @@ import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
 
 public class AioAcceptHandler implements CompletionHandler<AsynchronousSocketChannel, AsynchronousServerSocketChannel> {
-    private ReceivedMessageHandlerThread receivedMessageHandlerThread;
+    private RouteServiceServer routeServiceServer;
 
-    public AioAcceptHandler(ReceivedMessageHandlerThread receivedMessageHandlerThread) {
-        this.receivedMessageHandlerThread = receivedMessageHandlerThread;
+    public AioAcceptHandler(RouteServiceServer routeServiceServer) {
+        this.routeServiceServer = routeServiceServer;
     }
 
-    private AsynchronousSocketChannel socket;
     @Override
     public void completed(AsynchronousSocketChannel socket, AsynchronousServerSocketChannel attachment) {
         try {
             System.out.println("aio.AioAcceptHandler.completed called");
             attachment.accept(attachment, this);   // attachment就是Listening Socket
-            System.out.println("有客户端连接:" + socket.getRemoteAddress().toString());
+            System.out.println(":" + socket.getRemoteAddress().toString());
 
             startRead(socket);
         } catch (IOException e) {
@@ -39,7 +36,7 @@ public class AioAcceptHandler implements CompletionHandler<AsynchronousSocketCha
         ByteBuffer clientBuffer = ByteBuffer.allocate(102400);
         //read的原型是
         //read(ByteBuffer dst, A attachment, CompletionHandler<Integer,? super A> handler)
-        AioReadHandler rd = new AioReadHandler(socket, receivedMessageHandlerThread);
+        AioReadHandlerServer rd = new AioReadHandlerServer(socket, routeServiceServer);
         socket.read(clientBuffer, clientBuffer, rd);
         try {
         } catch (Exception e) {

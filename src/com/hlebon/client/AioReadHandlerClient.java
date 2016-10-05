@@ -1,8 +1,6 @@
-package com.hlebon.server;
+package com.hlebon.client;
 
 import com.hlebon.message.Message;
-import com.hlebon.message.MessageWrapper;
-import com.hlebon.messageHandlers.ReceivedMessageHandlerThread;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -11,21 +9,18 @@ import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AioReadHandler implements CompletionHandler<Integer,ByteBuffer> {
-    private ReceivedMessageHandlerThread receivedMessageHandlerThread;
-    private AsynchronousSocketChannel socket;
-    private CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
+public class AioReadHandlerClient implements CompletionHandler<Integer,ByteBuffer> {
+    private RouteServiceClient routeServiceClient;
+    private AsynchronousSocketChannel serverSocket;
     private List<Byte> poolByte = new ArrayList<>();
     private int counter;
 
-    public AioReadHandler(AsynchronousSocketChannel socket, ReceivedMessageHandlerThread receivedMessageHandlerThread) {
-        this.receivedMessageHandlerThread = receivedMessageHandlerThread;
-        this.socket = socket;
+    public AioReadHandlerClient(AsynchronousSocketChannel serverSocket, RouteServiceClient routeServiceClient) {
+        this.routeServiceClient = routeServiceClient;
+        this.serverSocket = serverSocket;
     }
 
     @Override
@@ -46,8 +41,7 @@ public class AioReadHandler implements CompletionHandler<Integer,ByteBuffer> {
                         Object object = toObject(messageFromByte);
                         if (object instanceof Message) {
                             Message message = (Message) object;
-                            MessageWrapper messageWrapper = new MessageWrapper(message, socket);
-                            receivedMessageHandlerThread.addMessageToHandle(messageWrapper);
+                            routeServiceClient.addMessageToHandle(message);
                             System.out.println(message);
                         }
                         poolByte.clear();
@@ -59,11 +53,11 @@ public class AioReadHandler implements CompletionHandler<Integer,ByteBuffer> {
                 }
             }
             buffer.clear();
-            socket.read(buffer, buffer, this);
+            serverSocket.read(buffer, buffer, this);
         }
         else if (i == -1) {
             try {
-                System.out.println("Close:" + socket.getRemoteAddress().toString());
+                System.out.println("Close:" + serverSocket.getRemoteAddress().toString());
                 buffer = null;
             } catch (IOException e) {
                 e.printStackTrace();

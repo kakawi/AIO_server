@@ -1,17 +1,18 @@
-package com.hlebon.messageHandlers;
+package com.hlebon.server;
 
 
 import com.hlebon.message.MessageWrapper;
+import com.hlebon.messageHandlers.server.MessageHandlerServer;
 
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
-public class ReceivedMessageHandlerThread implements Runnable {
+public class RouteServiceServer implements Runnable {
     private BlockingDeque<MessageWrapper> receivedMessageQueue = new LinkedBlockingDeque<>();
-    private Map<Class, MessageHandler> messageHandlers;
+    private final Map<Class, MessageHandlerServer> messageHandlers;
 
-    public ReceivedMessageHandlerThread(Map<Class, MessageHandler> messageHandlers) {
+    public RouteServiceServer(Map<Class, MessageHandlerServer> messageHandlers) {
         this.messageHandlers = messageHandlers;
     }
 
@@ -36,8 +37,8 @@ public class ReceivedMessageHandlerThread implements Runnable {
             }
             MessageWrapper messageWrapper = receivedMessageQueue.poll();
 
-            MessageHandler messageHandler = messageHandlers.get(messageWrapper.getMessage().getClass());
-            messageHandler.handle(messageWrapper);
+            MessageHandlerServer messageHandlerServer = messageHandlers.get(messageWrapper.getMessage().getClass());
+            messageHandlerServer.handle(messageWrapper);
         }
     }
 }

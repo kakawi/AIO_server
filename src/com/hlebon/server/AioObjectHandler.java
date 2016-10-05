@@ -3,7 +3,6 @@ package com.hlebon.server;
 
 import com.hlebon.message.Message;
 import com.hlebon.message.MessageWrapper;
-import com.hlebon.messageHandlers.ReceivedMessageHandlerThread;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -15,10 +14,10 @@ import java.nio.channels.CompletionHandler;
 public class AioObjectHandler implements CompletionHandler<Integer, BufferContainer> {
     private AsynchronousSocketChannel socket;
     private int sizeOfObjectInBytes;
-    private ReceivedMessageHandlerThread receivedMessageHandlerThread;
+    private RouteServiceServer routeServiceServer;
 
-    public AioObjectHandler(AsynchronousSocketChannel socket, ReceivedMessageHandlerThread receivedMessageHandlerThread, int sizeOfObjectInBytes) {
-        this.receivedMessageHandlerThread = receivedMessageHandlerThread;
+    public AioObjectHandler(AsynchronousSocketChannel socket, RouteServiceServer routeServiceServer, int sizeOfObjectInBytes) {
+        this.routeServiceServer = routeServiceServer;
         this.socket = socket;
         this.sizeOfObjectInBytes = sizeOfObjectInBytes;
     }
@@ -38,7 +37,7 @@ public class AioObjectHandler implements CompletionHandler<Integer, BufferContai
                 if (object instanceof Message) {
                     Message message = (Message) object;
                     MessageWrapper messageWrapper = new MessageWrapper(message, socket);
-                    receivedMessageHandlerThread.addMessageToHandle(messageWrapper);
+                    routeServiceServer.addMessageToHandle(messageWrapper);
                     System.out.println(message);
 
 //                    AioReadHandler rd = new AioReadHandler(socket, receivedMessageHandlerThread);

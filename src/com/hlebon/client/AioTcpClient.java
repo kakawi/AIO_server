@@ -1,169 +1,34 @@
 package com.hlebon.client;
 
 
-import com.hlebon.message.LoginMessage;
-import com.hlebon.message.Message;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
-import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.nio.channels.AsynchronousSocketChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
-import java.util.concurrent.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AioTcpClient {
-    public static JTextField jt=new JTextField();
-    public static ConcurrentHashMap<String,AsynchronousSocketChannel> sockets =new ConcurrentHashMap<>();
-
-    static AioTcpClient me;
-
-    private AsynchronousChannelGroup asyncChannelGroup;
+    AsynchronousChannelGroup asyncChannelGroup;
 
     public AioTcpClient() throws Exception {
         ExecutorService executor = Executors.newFixedThreadPool(20);
         asyncChannelGroup = AsynchronousChannelGroup.withThreadPool(executor);
     }
 
-    private final CharsetDecoder decoder = Charset.forName("GBK").newDecoder();
-
     public void start(final String ip, final int port) throws Exception {
-        int i = 0;
-            try {
-                AsynchronousSocketChannel connector = null;
-                if (connector == null || !connector.isOpen()) {
-                    connector = AsynchronousSocketChannel.open(asyncChannelGroup);
+        AsynchronousSocketChannel serverSocket = AsynchronousSocketChannel.open(asyncChannelGroup);
 
-                    sockets.putIfAbsent(String.valueOf(i), connector);
-                    connector.setOption(StandardSocketOptions.TCP_NODELAY, true);
-                    connector.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-                    connector.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
+        serverSocket.setOption(StandardSocketOptions.TCP_NODELAY, true);
+        serverSocket.setOption(StandardSocketOptions.SO_REUSEADDR, true);
+        serverSocket.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
 
-                    connector.connect(new InetSocketAddress(ip, port), connector, new AioConnectHandler(i));
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        serverSocket.connect(new InetSocketAddress(ip, port), serverSocket, new AioConnectHandler());
+        Thread.sleep(400000);
     }
 
-    public void work() throws Exception{
+    public static void main(String[] args) throws Exception {
         AioTcpClient client = new AioTcpClient();
         client.start("localhost", 9008);
-    }
-
-    public void send() throws UnsupportedEncodingException {
-
-        AsynchronousSocketChannel socket=sockets.get("0");
-
-        // 组发送buffer
-//        String sendString=jt.getText();
-//        ByteBuffer clientBuffer=ByteBuffer.wrap(sendString.getBytes("UTF-8"));
-
-        // MY
-        try {
-//            Message message = new SayMessage();
-            Message message = new LoginMessage();
-
-            byte[] objectInByte = toByte(message);
-
-            ByteBuffer byteBuffer = ByteBuffer.allocate(objectInByte.length + 2);
-            byteBuffer.put(objectInByte);
-            byteBuffer.put((byte)-1);
-            byteBuffer.put((byte)-1);
-
-            for (int i = 0; i < 1000000; i++) {
-                byteBuffer.rewind();
-                do {
-                    Future<Integer> future = socket.write(byteBuffer);
-                    Integer answer = future.get();
-                    System.out.println(i + " Answer = " + answer);
-                } while (byteBuffer.position() < byteBuffer.limit());
-            }
-        } catch (IOException | InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static byte[] toByte(Message loginMessage) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutput out = null;
-
-        out = new ObjectOutputStream(bos);
-        out.writeObject(loginMessage);
-        out.flush();
-        return bos.toByteArray();
-    }
-
-    public   void createPanel() {
-        me=this;
-        JFrame f = new JFrame("Wallpaper");
-        f.getContentPane().setLayout(new BorderLayout());
-
-        JPanel p=new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton bt=new JButton("Send");
-        p.add(bt);
-        me=this;
-        bt.addActionListener(new ActionListener(){
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    me.send();
-
-                } catch (Exception ex) {
-                    Logger.getLogger(AioTcpClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-
-        });
-
-        bt=new JButton("结束 NOTHING");
-        p.add(bt);
-        me=this;
-        bt.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            }
-
-        });
-
-        f.getContentPane().add(jt,BorderLayout.CENTER);
-        f.getContentPane().add(p, BorderLayout.EAST);
-
-        f.setSize(450, 300);
-        f.setDefaultCloseOperation (JFrame.EXIT_ON_CLOSE);
-        f.setLocationRelativeTo (null);
-        f.setVisible (true);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                AioTcpClient d = null;
-                try {
-                    d = new AioTcpClient();
-                } catch (Exception ex) {
-                    Logger.getLogger(AioTcpClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-                d.createPanel();
-                try {
-                    d.work();
-                } catch (Exception ex) {
-                    Logger.getLogger(AioTcpClient.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-
-            }
-        });
     }
 }

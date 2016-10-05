@@ -4,18 +4,18 @@ import java.nio.channels.AsynchronousSocketChannel;
 
 public class MessageWrapper extends Message {
     private Message message;
-    private AsynchronousSocketChannel clientSocket;
+    private AsynchronousSocketChannel from;
 
-    public MessageWrapper(Message message, AsynchronousSocketChannel clientSocket) {
+    public MessageWrapper(Message message, AsynchronousSocketChannel from) {
         this.message = message;
-        this.clientSocket = clientSocket;
+        this.from = from;
     }
 
     public Message getMessage() {
         return message;
     }
 
-    public AsynchronousSocketChannel getClientSocket() {
-        return clientSocket;
+    public AsynchronousSocketChannel getFrom() {
+        return from;
     }
 }

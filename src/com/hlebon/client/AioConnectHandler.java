@@ -1,44 +1,42 @@
 package com.hlebon.client;
 
+import com.hlebon.message.*;
+import com.hlebon.messageHandlers.client.*;
+
+import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
+import java.util.HashMap;
+import java.util.Map;
 
-public class AioConnectHandler implements CompletionHandler<Void,AsynchronousSocketChannel>
-{
-    private Integer content = 0;
-
-    public AioConnectHandler(Integer value){
-        this.content = value;
-    }
+public class AioConnectHandler implements CompletionHandler<Void, AsynchronousSocketChannel> {
 
     @Override
-    public void completed(Void attachment, AsynchronousSocketChannel connector) {
-//        try {
-//            connector.write(
-//                    ByteBuffer.wrap(String.valueOf(content).getBytes())
-//            ).get();
-            startRead(connector);
-//        }
+    public void completed(Void attachment, AsynchronousSocketChannel serverSocket) {
+        SenderServiceClient senderServiceClient = new SenderServiceClient(serverSocket);
+        new Thread(senderServiceClient).start();
+
+        LoginMessage message = new LoginMessage("c", 10);
+
+        Map<Class, MessageHandlerClient> messageHandlers = new HashMap<>();
+        RouteServiceClient routeServiceClient = new RouteServiceClient(messageHandlers);
+
+        messageHandlers.put(AnswerLoginMessage.class, new AnswerLoginMessageHandlerServer(message.getName(), senderServiceClient, routeServiceClient));
+        messageHandlers.put(SayMessage.class, new SayMessageHandlerClient(senderServiceClient, routeServiceClient));
+        messageHandlers.put(NewClientMessage.class, new NewClientMessageHandlerClient(senderServiceClient, routeServiceClient));
+        messageHandlers.put(LogoutMessageClient.class, new LogoutMessageHandlerClient(senderServiceClient, routeServiceClient));
+
+        new Thread(routeServiceClient).start();
+
+
+        senderServiceClient.addMessageToSend(message);
+
+        ByteBuffer clientBuffer = ByteBuffer.allocate(1024);
+        serverSocket.read(clientBuffer, clientBuffer, new AioReadHandlerClient(serverSocket, routeServiceClient));
     }
 
     @Override
     public void failed(Throwable exc, AsynchronousSocketChannel attachment) {
         exc.printStackTrace();
     }
-
-    public void startRead(AsynchronousSocketChannel socket) {
-        //read的原型是
-        //read(ByteBuffer dst, A attachment,
-        //    CompletionHandler<Integer,? super A> handler)
-        //即它的操作处理器，的A型，是实际调用read的第二个参数，即clientBuffer。
-        // V型是存有read的连接情况的参数
-//        ByteBuffer clientBuffer = ByteBuffer.allocate(1024);
-//        socket.read(clientBuffer, clientBuffer, new AioReadHandler(socket));
-        try {
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
 }

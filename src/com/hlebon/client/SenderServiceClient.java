@@ -1,8 +1,7 @@
-package com.hlebon.server;
+package com.hlebon.client;
 
 
 import com.hlebon.message.Message;
-import com.hlebon.message.MessageWrapper;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,22 +10,30 @@ import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingDeque;
 
-public class SenderService implements Runnable {
-    private BlockingDeque<MessageWrapper> queue = new LinkedBlockingDeque<>();
+public class SenderServiceClient implements Runnable {
+    private BlockingDeque<Message> queue = new LinkedBlockingDeque<>();
+    private final AsynchronousSocketChannel serverSocket;
 
-    public void addMessageToSend(MessageWrapper messageWrapper) {
-        queue.add(messageWrapper);
+    public SenderServiceClient(AsynchronousSocketChannel serverSocket) {
+        this.serverSocket = serverSocket;
+    }
+
+    public void addMessageToSend(Message message) {
+        queue.add(message);
         synchronized (this) {
             notify();
         }
     }
+
     @Override
     public void run() {
         while (true) {
-            if (queue.isEmpty()) {
-                synchronized (this) {
+            synchronized (this) {
+                if (queue.isEmpty()) {
                     try {
                         wait();
                     } catch (InterruptedException e) {
@@ -34,18 +41,26 @@ public class SenderService implements Runnable {
                     }
                 }
             }
-            MessageWrapper messageWrapper = queue.poll();
-            Message message = messageWrapper.getMessage();
-            AsynchronousSocketChannel socket = messageWrapper.getClientSocket();
+
+            Message message = queue.poll();
 
             try {
                 byte[] objectInByte = toByte(message);
                 int length = objectInByte.length;
-                ByteBuffer byteBuffer = ByteBuffer.allocate(length + 1);
+
+                ByteBuffer byteBuffer = ByteBuffer.allocate(length + 2);
                 byteBuffer.put(objectInByte);
-                byteBuffer.put((byte)'\r');
-                socket.write(byteBuffer);
-            } catch (IOException e) {
+                byteBuffer.put((byte)-1);
+                byteBuffer.put((byte)-1);
+                byteBuffer.rewind();
+
+                System.out.println("Send message to Server: " + message);
+
+                do {
+                    Future<Integer> future = serverSocket.write(byteBuffer);
+                    future.get();
+                } while (byteBuffer.position() < byteBuffer.limit());
+            } catch (IOException | InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
         }

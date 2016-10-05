@@ -2,11 +2,12 @@ package com.hlebon.server;
 
 
 import com.hlebon.message.LoginMessage;
+import com.hlebon.message.LogoutMessageServer;
 import com.hlebon.message.SayMessage;
-import com.hlebon.messageHandlers.LoginMessageHandler;
-import com.hlebon.messageHandlers.MessageHandler;
-import com.hlebon.messageHandlers.ReceivedMessageHandlerThread;
-import com.hlebon.messageHandlers.SayMessageHandler;
+import com.hlebon.messageHandlers.server.LoginMessageHandlerServer;
+import com.hlebon.messageHandlers.server.LogoutMessageHandlerServer;
+import com.hlebon.messageHandlers.server.MessageHandlerServer;
+import com.hlebon.messageHandlers.server.SayMessageHandlerServer;
 
 import java.net.InetSocketAddress;
 import java.nio.channels.AsynchronousChannelGroup;
@@ -19,11 +20,11 @@ import java.util.concurrent.Executors;
 public class AioTcpServer implements Runnable {
     private AsynchronousChannelGroup asyncChannelGroup;
     private AsynchronousServerSocketChannel listener;
-    ReceivedMessageHandlerThread receivedMessageHandlerThread;
+    RouteServiceServer routeServiceServer;
 
 
-    public AioTcpServer(int port, ReceivedMessageHandlerThread receivedMessageHandlerThread) throws Exception {
-        this.receivedMessageHandlerThread = receivedMessageHandlerThread;
+    public AioTcpServer(int port, RouteServiceServer routeServiceServer) throws Exception {
+        this.routeServiceServer = routeServiceServer;
         ExecutorService executor = Executors.newFixedThreadPool(20);
         asyncChannelGroup = AsynchronousChannelGroup.withThreadPool(executor);
         listener = AsynchronousServerSocketChannel.open(asyncChannelGroup).bind(new InetSocketAddress(port));
@@ -31,7 +32,7 @@ public class AioTcpServer implements Runnable {
 
     public void run() {
         try {
-            AioAcceptHandler acceptHandler = new AioAcceptHandler(receivedMessageHandlerThread);
+            AioAcceptHandler acceptHandler = new AioAcceptHandler(routeServiceServer);
             listener.accept(listener, acceptHandler);
             Thread.sleep(400000);
         } catch (Exception e) {
@@ -42,17 +43,18 @@ public class AioTcpServer implements Runnable {
     }
 
     public static void main(String... args) throws Exception {
-        SenderService senderService = new SenderService();
-        new Thread(senderService).start();
+        SenderServiceServer senderServiceServer = new SenderServiceServer();
+        new Thread(senderServiceServer).start();
 
-        Map<Class, MessageHandler> messageHandlers = new HashMap<>();
-        messageHandlers.put(LoginMessage.class, new LoginMessageHandler(senderService));
-        messageHandlers.put(SayMessage.class, new SayMessageHandler(senderService));
+        Map<Class, MessageHandlerServer> messageHandlers = new HashMap<>();
+        messageHandlers.put(LoginMessage.class, new LoginMessageHandlerServer(senderServiceServer));
+        messageHandlers.put(LogoutMessageServer.class, new LogoutMessageHandlerServer(senderServiceServer));
+        messageHandlers.put(SayMessage.class, new SayMessageHandlerServer(senderServiceServer));
 
-        ReceivedMessageHandlerThread receivedMessageHandlerThread = new ReceivedMessageHandlerThread(messageHandlers);
-        new Thread(receivedMessageHandlerThread).start();
+        RouteServiceServer routeServiceServer = new RouteServiceServer(messageHandlers);
+        new Thread(routeServiceServer).start();
 
-        AioTcpServer server = new AioTcpServer(9008, receivedMessageHandlerThread);
+        AioTcpServer server = new AioTcpServer(9008, routeServiceServer);
         new Thread(server).start();
     }
 }

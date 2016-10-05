@@ -1,18 +1,27 @@
 package com.hlebon.message;
 
-import java.io.Serializable;
-
-public class SayMessage extends Message implements Serializable {
+public class SayMessage extends Message {
     private static final long serialVersionUID = -1522117679723983086L;
 
-    private Character c = '\uACED';
-    private Character m = '\uACED';
+    private final String from;
+    private final String to;
+    private final String text;
 
-    public int getParameter() {
-        return 10;
+    public SayMessage(String from, String to, String text) {
+        this.from = from;
+        this.to = to;
+        this.text = text;
     }
 
-    public Character getC() {
-        return c;
+    public String getFrom() {
+        return from;
+    }
+
+    public String getTo() {
+        return to;
+    }
+
+    public String getText() {
+        return text;
     }
 }
