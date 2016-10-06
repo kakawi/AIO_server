@@ -1,5 +1,6 @@
 package com.hlebon.client;
 
+import com.hlebon.Constance;
 import com.hlebon.message.Message;
 
 import java.io.ByteArrayInputStream;
@@ -29,9 +30,7 @@ public class AioReadHandlerClient implements CompletionHandler<Integer,ByteBuffe
             buffer.flip();
             for (int j = 0; j < buffer.limit(); j++) {
                 byte currentByte = buffer.get(j);
-                if (currentByte == -1 && poolByte.get(poolByte.size() - 1) == -1) {
-                    System.out.println(counter++);
-                    poolByte.remove(poolByte.size() - 1);
+                if (currentByte == Constance.OBJECT_DELIMITER) {
                     byte[] messageFromByte = new byte[poolByte.size()];
                     for (int k = 0; k < poolByte.size(); k++) {
                         messageFromByte[k] = poolByte.get(k);

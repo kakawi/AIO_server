@@ -1,5 +1,6 @@
 package com.hlebon.server;
 
+import com.hlebon.Constance;
 import com.hlebon.message.LogoutMessageServer;
 import com.hlebon.message.Message;
 import com.hlebon.message.MessageWrapper;
@@ -11,15 +12,12 @@ import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AioReadHandlerServer implements CompletionHandler<Integer,ByteBuffer> {
     private RouteServiceServer routeServiceServer;
     private AsynchronousSocketChannel socket;
-    private CharsetDecoder decoder = Charset.forName("UTF-8").newDecoder();
     private List<Byte> poolByte = new ArrayList<>();
     private int counter;
 
@@ -34,9 +32,7 @@ public class AioReadHandlerServer implements CompletionHandler<Integer,ByteBuffe
             buffer.flip();
             for (int j = 0; j < buffer.limit(); j++) {
                 byte currentByte = buffer.get(j);
-                if (currentByte == -1 && poolByte.get(poolByte.size() - 1) == -1) {
-                    System.out.println(counter++);
-                    poolByte.remove(poolByte.size() - 1);
+                if (currentByte == Constance.OBJECT_DELIMITER) {
                     byte[] messageFromByte = new byte[poolByte.size()];
                     for (int k = 0; k < poolByte.size(); k++) {
                         messageFromByte[k] = poolByte.get(k);

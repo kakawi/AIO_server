@@ -1,6 +1,7 @@
 package com.hlebon.client;
 
 
+import com.hlebon.Constance;
 import com.hlebon.message.Message;
 
 import java.io.ByteArrayOutputStream;
@@ -48,10 +49,9 @@ public class SenderServiceClient implements Runnable {
                 byte[] objectInByte = toByte(message);
                 int length = objectInByte.length;
 
-                ByteBuffer byteBuffer = ByteBuffer.allocate(length + 2);
+                ByteBuffer byteBuffer = ByteBuffer.allocate(length + 1);
                 byteBuffer.put(objectInByte);
-                byteBuffer.put((byte)-1);
-                byteBuffer.put((byte)-1);
+                byteBuffer.put(Constance.OBJECT_DELIMITER);
                 byteBuffer.rewind();
 
                 System.out.println("Send message to Server: " + message);
