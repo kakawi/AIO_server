@@ -23,13 +23,15 @@ public class SwingControl implements Runnable {
     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 
     private JFrame mainFrame;
-    private JLabel headerLabel;
-    private JLabel statusLabel;
     private JPanel controlPanel;
     private JTextField textField;
     private JTextArea textArea;
     private JComboBox<String> comboBox;
-    private String textChat;
+
+    private final int TEXT_AREA_ROWS = 8;
+    private final int TEXT_AREA_COLUMNS = 20;
+
+    private final int TEXT_FIELD_COLUMNS = 14;
 
     public SwingControl(String myName, SenderServiceClient senderServiceClient) {
         this.myName = myName;
@@ -73,10 +75,6 @@ public class SwingControl implements Runnable {
         mainFrame.setSize(400,400);
         mainFrame.setLayout(new GridLayout(3, 1));
 
-        headerLabel = new JLabel("",JLabel.CENTER );
-        statusLabel = new JLabel("",JLabel.CENTER);
-
-        statusLabel.setSize(350,100);
         mainFrame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent windowEvent){
                 System.exit(0);
@@ -91,7 +89,7 @@ public class SwingControl implements Runnable {
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new FlowLayout());
-        textField = new JTextField(14);
+        textField = new JTextField(TEXT_FIELD_COLUMNS);
         JButton okButton = new JButton("OK");
         okButton.setActionCommand("OK");
         okButton.addActionListener(new ButtonClickListener());
@@ -106,8 +104,10 @@ public class SwingControl implements Runnable {
     }
 
     private void showEventDemo(){
-        textArea = new JTextArea(10,20);
-        controlPanel.add(textArea);
+        textArea = new JTextArea(TEXT_AREA_ROWS, TEXT_AREA_COLUMNS);
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+        controlPanel.add(scrollPane);
 
         mainFrame.setVisible(true);
     }
