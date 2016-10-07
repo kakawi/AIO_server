@@ -18,7 +18,6 @@ public class LoginMessageHandlerServer implements MessageHandlerServer {
         if (message instanceof LoginMessage) {
             LoginMessage loginMessage = (LoginMessage) message;
             senderServiceServer.addClient(loginMessage.getName(), messageWrapper.getFrom());
-            System.out.println("We have a new client: " + loginMessage.getName());
         }
     }
 }

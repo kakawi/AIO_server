@@ -2,6 +2,7 @@ package com.hlebon.client;
 
 import com.hlebon.message.*;
 import com.hlebon.messageHandlers.client.*;
+import com.hlebon.server.Logger;
 
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
@@ -15,6 +16,7 @@ public class AioConnectHandler implements CompletionHandler<Void, AsynchronousSo
     public void completed(Void attachment, AsynchronousSocketChannel serverSocket) {
         SenderServiceClient senderServiceClient = new SenderServiceClient(serverSocket);
         new Thread(senderServiceClient).start();
+        Logger.info("The SenderServiceClient has started");
 
         LoginMessage message = new LoginMessage("c", 10);
 
@@ -27,7 +29,7 @@ public class AioConnectHandler implements CompletionHandler<Void, AsynchronousSo
         messageHandlers.put(LogoutMessageClient.class, new LogoutMessageHandlerClient(senderServiceClient, routeServiceClient));
 
         new Thread(routeServiceClient).start();
-
+        Logger.info("The RouteServiceClient has started");
 
         senderServiceClient.addMessageToSend(message);
 

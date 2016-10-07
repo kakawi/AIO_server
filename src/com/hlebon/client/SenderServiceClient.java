@@ -2,12 +2,11 @@ package com.hlebon.client;
 
 
 import com.hlebon.Constance;
+import com.hlebon.UtilsMethods;
 import com.hlebon.message.Message;
+import com.hlebon.server.Logger;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.concurrent.BlockingDeque;
@@ -46,7 +45,7 @@ public class SenderServiceClient implements Runnable {
             Message message = queue.poll();
 
             try {
-                byte[] objectInByte = toByte(message);
+                byte[] objectInByte = UtilsMethods.toByte(message);
                 int length = objectInByte.length;
 
                 ByteBuffer byteBuffer = ByteBuffer.allocate(length + 1);
@@ -54,7 +53,7 @@ public class SenderServiceClient implements Runnable {
                 byteBuffer.put(Constance.OBJECT_DELIMITER);
                 byteBuffer.rewind();
 
-                System.out.println("Send message to Server: " + message);
+                Logger.info("Send message to Server: " + message);
 
                 do {
                     Future<Integer> future = serverSocket.write(byteBuffer);
@@ -64,15 +63,5 @@ public class SenderServiceClient implements Runnable {
                 e.printStackTrace();
             }
         }
-    }
-
-    private static byte[] toByte(Message loginMessage) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutput out = null;
-
-        out = new ObjectOutputStream(bos);
-        out.writeObject(loginMessage);
-        out.flush();
-        return bos.toByteArray();
     }
 }

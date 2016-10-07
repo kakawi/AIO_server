@@ -1,6 +1,7 @@
 package com.hlebon.server;
 
 
+import com.hlebon.Constance;
 import com.hlebon.message.LoginMessage;
 import com.hlebon.message.LogoutMessageServer;
 import com.hlebon.message.SayMessage;
@@ -34,7 +35,8 @@ public class AioTcpServer implements Runnable {
         try {
             AioAcceptHandler acceptHandler = new AioAcceptHandler(routeServiceServer);
             listener.accept(listener, acceptHandler);
-            Thread.sleep(400000);
+            Logger.info("The Server has started");
+            Thread.currentThread().join();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -45,6 +47,7 @@ public class AioTcpServer implements Runnable {
     public static void main(String... args) throws Exception {
         SenderServiceServer senderServiceServer = new SenderServiceServer();
         new Thread(senderServiceServer).start();
+        Logger.info("The SenderServiceServer has started");
 
         Map<Class, MessageHandlerServer> messageHandlers = new HashMap<>();
         messageHandlers.put(LoginMessage.class, new LoginMessageHandlerServer(senderServiceServer));
@@ -53,8 +56,9 @@ public class AioTcpServer implements Runnable {
 
         RouteServiceServer routeServiceServer = new RouteServiceServer(messageHandlers);
         new Thread(routeServiceServer).start();
+        Logger.info("The RouteServiceServer has started");
 
-        AioTcpServer server = new AioTcpServer(9008, routeServiceServer);
+        AioTcpServer server = new AioTcpServer(Constance.SERVER_PORT, routeServiceServer);
         new Thread(server).start();
     }
 }

@@ -12,11 +12,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
-public class SwingControl implements Runnable {
+public class SwingControl {
 
     private SenderServiceClient senderServiceClient;
     private final String myName;
@@ -29,9 +30,9 @@ public class SwingControl implements Runnable {
     private JComboBox<String> comboBox;
 
     private final int TEXT_AREA_ROWS = 8;
-    private final int TEXT_AREA_COLUMNS = 20;
+    private final int TEXT_AREA_COLUMNS = 30;
 
-    private final int TEXT_FIELD_COLUMNS = 14;
+    private final int TEXT_FIELD_COLUMNS = 24;
 
     public SwingControl(String myName, SenderServiceClient senderServiceClient) {
         this.myName = myName;
@@ -41,29 +42,35 @@ public class SwingControl implements Runnable {
     }
 
     public void connectedToChat(AnswerLoginMessage answerLoginMessage) {
-        textArea.append("We're in the chat");
+        addInTextAread("We're in the chat");
         ArrayList<String> existedClients = answerLoginMessage.getExistedClients();
         for (String existedClient: existedClients) {
             comboBox.addItem(existedClient);
         }
     }
 
+    private void addInTextAread(String text) {
+        Date dateNow = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm:ss - ");
+        textArea.append("\n" + simpleDateFormat.format(dateNow) + text);
+    }
+
     public void newClient(NewClientMessage newClientMessage) {
         String nameNewClient = newClientMessage.getName();
-        textArea.append("\nNew client has come: " + nameNewClient);
+        addInTextAread("New client has come: " + nameNewClient);
         comboBox.addItem(nameNewClient);
     }
 
     public void logoutClient(LogoutMessageClient logoutMessageClient) {
         String nameClient = logoutMessageClient.getNameClient();
-        textArea.append("\nClient " + nameClient + " logout");
+        textArea.append("Client " + nameClient + " logout");
         comboBox.removeItem(nameClient);
     }
 
     public void addMessage(SayMessage sayMessage) {
         String from = sayMessage.getFrom();
         String text = sayMessage.getText();
-        textArea.append("\n[" + from + "] " + text);
+        addInTextAread("[" + from + "] " + text);
     }
 
     private void sendMessage(SayMessage sayMessage) {
@@ -117,27 +124,20 @@ public class SwingControl implements Runnable {
             String command = e.getActionCommand();
             if(command.equals( "OK" ))  {
                 String nameDestinationClient = (String)comboBox.getSelectedItem();
+                if(nameDestinationClient == null) {
+                    addInTextAread("Choose the client");
+                    return;
+                }
+
                 String text = textField.getText();
+                if("".equals(text)) {
+                    addInTextAread("Write the message");
+                    return;
+                }
+
                 textField.setText("");
                 SayMessage sayMessage = new SayMessage(myName, nameDestinationClient, text);
                 senderServiceClient.addMessageToSend(sayMessage);
-            }
-        }
-    }
-
-    @Override
-    public void run() {
-        while (true) {
-            System.out.print("Enter the Client Name: ");
-            try {
-                String clientName = bufferedReader.readLine();
-                System.out.println(clientName);
-                System.out.print("Enter the message: ");
-                String text = bufferedReader.readLine();
-                SayMessage sayMessage = new SayMessage(myName, clientName, text);
-                sendMessage(sayMessage);
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
     }

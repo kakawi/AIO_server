@@ -20,7 +20,6 @@ public class SayMessageHandlerClient implements MessageHandlerClient {
         if (message instanceof SayMessage) {
             SayMessage sayMessage = (SayMessage) message;
             routeServiceClient.getSwingControl().addMessage(sayMessage);
-            System.out.println("Message from " + sayMessage.getFrom() + " --- " + sayMessage.getText());
         }
     }
 }

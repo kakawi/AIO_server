@@ -2,12 +2,10 @@ package com.hlebon.server;
 
 
 import com.hlebon.Constance;
+import com.hlebon.UtilsMethods;
 import com.hlebon.message.*;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.util.ArrayList;
@@ -33,7 +31,7 @@ public class SenderServiceServer implements Runnable {
                 clients.entrySet()) {
             if (entry.getValue() == socket) {
                 String nameClient = entry.getKey();
-                System.out.println("The client " + nameClient + " has gone");
+                Logger.info("The client " + nameClient + " has gone");
                 clients.remove(nameClient);
                 sendToEverybody(new LogoutMessageClient(nameClient));
                 break;
@@ -83,7 +81,7 @@ public class SenderServiceServer implements Runnable {
             AsynchronousSocketChannel socket = messageWrapper.getFrom();
 
             try {
-                byte[] objectInByte = toByte(message);
+                byte[] objectInByte = UtilsMethods.toByte(message);
                 int length = objectInByte.length;
 
                 ByteBuffer byteBuffer = ByteBuffer.allocate(length + 1);
@@ -91,7 +89,7 @@ public class SenderServiceServer implements Runnable {
                 byteBuffer.put(Constance.OBJECT_DELIMITER);
                 byteBuffer.rewind();
 
-                System.out.println("Send message " + message);
+                Logger.info("Send message " + message);
 
                 do {
                     Future<Integer> future = socket.write(byteBuffer);
@@ -101,15 +99,5 @@ public class SenderServiceServer implements Runnable {
                 e.printStackTrace();
             }
         }
-    }
-
-    private static byte[] toByte(Message loginMessage) throws IOException {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutput out = null;
-
-        out = new ObjectOutputStream(bos);
-        out.writeObject(loginMessage);
-        out.flush();
-        return bos.toByteArray();
     }
 }

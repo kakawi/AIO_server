@@ -24,7 +24,6 @@ public class AnswerLoginMessageHandlerServer implements MessageHandlerClient {
             AnswerLoginMessage answerLoginMessage = (AnswerLoginMessage) message;
 
             SwingControl swingControl = new SwingControl(myName, senderServiceClient);
-            new Thread(swingControl).start();
             routeServiceClient.setSwingControl(swingControl);
             swingControl.connectedToChat(answerLoginMessage);
         }

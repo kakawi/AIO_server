@@ -1,6 +1,9 @@
 package com.hlebon.client;
 
 
+import com.hlebon.Constance;
+import com.hlebon.server.Logger;
+
 import java.net.InetSocketAddress;
 import java.net.StandardSocketOptions;
 import java.nio.channels.AsynchronousChannelGroup;
@@ -24,11 +27,12 @@ public class AioTcpClient {
         serverSocket.setOption(StandardSocketOptions.SO_KEEPALIVE, true);
 
         serverSocket.connect(new InetSocketAddress(ip, port), serverSocket, new AioConnectHandler());
-        Thread.sleep(400000);
+        Logger.info("The Client has started");
+        Thread.currentThread().join();
     }
 
     public static void main(String[] args) throws Exception {
         AioTcpClient client = new AioTcpClient();
-        client.start("localhost", 9008);
+        client.start("localhost", Constance.SERVER_PORT);
     }
 }

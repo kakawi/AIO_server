@@ -1,12 +1,11 @@
 package com.hlebon.client;
 
 import com.hlebon.Constance;
+import com.hlebon.UtilsMethods;
 import com.hlebon.message.Message;
+import com.hlebon.server.Logger;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousSocketChannel;
 import java.nio.channels.CompletionHandler;
@@ -37,11 +36,11 @@ public class AioReadHandlerClient implements CompletionHandler<Integer,ByteBuffe
                     }
 
                     try {
-                        Object object = toObject(messageFromByte);
+                        Object object = UtilsMethods.toObject(messageFromByte);
                         if (object instanceof Message) {
                             Message message = (Message) object;
                             routeServiceClient.addMessageToHandle(message);
-                            System.out.println(message);
+                            Logger.info("Got message from server " + message);
                         }
                         poolByte.clear();
                     } catch (IOException | ClassNotFoundException e) {
@@ -68,14 +67,4 @@ public class AioReadHandlerClient implements CompletionHandler<Integer,ByteBuffe
     public void failed(Throwable exc, ByteBuffer attachment) {
         System.out.println("cancelled");
     }
-
-    private static Object toObject(byte[] bytes) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-        ObjectInput in;
-
-        in = new ObjectInputStream(bis);
-        Object o = in.readObject();
-        return o;
-    }
-
 }

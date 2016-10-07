@@ -16,9 +16,9 @@ public class AioAcceptHandler implements CompletionHandler<AsynchronousSocketCha
     @Override
     public void completed(AsynchronousSocketChannel socket, AsynchronousServerSocketChannel attachment) {
         try {
-            System.out.println("aio.AioAcceptHandler.completed called");
+            Logger.info("AioAcceptHandler#completed called");
             attachment.accept(attachment, this);   // attachment就是Listening Socket
-            System.out.println(":" + socket.getRemoteAddress().toString());
+            Logger.info(":" + socket.getRemoteAddress().toString());
 
             startRead(socket);
         } catch (IOException e) {
@@ -38,10 +38,5 @@ public class AioAcceptHandler implements CompletionHandler<AsynchronousSocketCha
         //read(ByteBuffer dst, A attachment, CompletionHandler<Integer,? super A> handler)
         AioReadHandlerServer rd = new AioReadHandlerServer(socket, routeServiceServer);
         socket.read(clientBuffer, clientBuffer, rd);
-        try {
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
-
 }
