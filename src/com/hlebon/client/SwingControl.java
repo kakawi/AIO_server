@@ -11,17 +11,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class SwingControl {
-
     private SenderServiceClient senderServiceClient;
     private final String myName;
-    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));
 
     private JFrame mainFrame;
     private JPanel controlPanel;

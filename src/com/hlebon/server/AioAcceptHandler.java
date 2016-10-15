@@ -17,7 +17,7 @@ public class AioAcceptHandler implements CompletionHandler<AsynchronousSocketCha
     public void completed(AsynchronousSocketChannel socket, AsynchronousServerSocketChannel attachment) {
         try {
             Logger.info("AioAcceptHandler#completed called");
-            attachment.accept(attachment, this);   // attachment就是Listening Socket
+            attachment.accept(attachment, this);
             Logger.info(":" + socket.getRemoteAddress().toString());
 
             startRead(socket);
@@ -34,8 +34,6 @@ public class AioAcceptHandler implements CompletionHandler<AsynchronousSocketCha
 
     public void startRead(AsynchronousSocketChannel socket) {
         ByteBuffer clientBuffer = ByteBuffer.allocate(102400);
-        //read的原型是
-        //read(ByteBuffer dst, A attachment, CompletionHandler<Integer,? super A> handler)
         AioReadHandlerServer rd = new AioReadHandlerServer(socket, routeServiceServer);
         socket.read(clientBuffer, clientBuffer, rd);
     }

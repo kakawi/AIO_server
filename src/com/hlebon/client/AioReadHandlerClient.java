@@ -51,7 +51,7 @@ public class AioReadHandlerClient implements CompletionHandler<Integer,ByteBuffe
         }
         else if (i == -1) {
             try {
-                System.out.println("Close:" + serverSocket.getRemoteAddress().toString());
+                Logger.info("Close: " + serverSocket.getRemoteAddress().toString());
                 buffer = null;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -61,6 +61,6 @@ public class AioReadHandlerClient implements CompletionHandler<Integer,ByteBuffe
 
     @Override
     public void failed(Throwable exc, ByteBuffer attachment) {
-        System.out.println("cancelled");
+        Logger.info("cancelled");
     }
 }

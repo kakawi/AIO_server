@@ -1,6 +1,5 @@
 package com.hlebon.server;
 
-
 import com.hlebon.Constance;
 import com.hlebon.message.*;
 
@@ -36,7 +35,6 @@ public class SenderServiceServer implements Runnable {
                 break;
             }
         }
-
     }
 
     public void sendMessageByName(String name, Message message) {

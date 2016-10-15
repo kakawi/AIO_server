@@ -1,6 +1,5 @@
 package com.hlebon.messageHandlers.server;
 
-
 import com.hlebon.server.SenderServiceServer;
 import com.hlebon.message.Message;
 import com.hlebon.message.MessageWrapper;

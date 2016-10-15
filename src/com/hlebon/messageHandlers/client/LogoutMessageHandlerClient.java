@@ -1,6 +1,5 @@
 package com.hlebon.messageHandlers.client;
 
-
 import com.hlebon.client.RouteServiceClient;
 import com.hlebon.client.SenderServiceClient;
 import com.hlebon.message.LogoutMessageClient;

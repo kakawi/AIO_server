@@ -1,6 +1,5 @@
 package com.hlebon.client;
 
-
 import com.hlebon.message.Message;
 import com.hlebon.messageHandlers.client.MessageHandlerClient;
 

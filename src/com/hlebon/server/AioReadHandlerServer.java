@@ -16,7 +16,6 @@ public class AioReadHandlerServer implements CompletionHandler<Integer,ByteBuffe
     private RouteServiceServer routeServiceServer;
     private AsynchronousSocketChannel socket;
     private List<Byte> poolByte = new ArrayList<>();
-    private int counter;
 
     public AioReadHandlerServer(AsynchronousSocketChannel socket, RouteServiceServer routeServiceServer) {
         this.routeServiceServer = routeServiceServer;
@@ -53,7 +52,7 @@ public class AioReadHandlerServer implements CompletionHandler<Integer,ByteBuffe
         }
         else if (i == -1) {
             try {
-                System.out.println("Close:" + socket.getRemoteAddress().toString());
+                Logger.info("Close: " + socket.getRemoteAddress().toString());
                 Message message = new LogoutMessageServer();
                 MessageWrapper messageWrapper = new MessageWrapper(message, socket);
                 routeServiceServer.addMessageToHandle(messageWrapper);
@@ -65,6 +64,6 @@ public class AioReadHandlerServer implements CompletionHandler<Integer,ByteBuffe
 
     @Override
     public void failed(Throwable exc, ByteBuffer attachment) {
-        System.out.println("cancelled");
+        Logger.info("cancelled");
     }
 }

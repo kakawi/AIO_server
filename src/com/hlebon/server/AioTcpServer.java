@@ -40,7 +40,7 @@ public class AioTcpServer implements Runnable {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            System.out.println("finished server");
+            Logger.info("finished server");
         }
     }
 

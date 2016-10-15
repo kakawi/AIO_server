@@ -1,6 +1,5 @@
 package com.hlebon.client;
 
-
 import com.hlebon.Constance;
 import com.hlebon.server.Logger;
 
