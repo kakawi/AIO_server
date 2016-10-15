@@ -63,7 +63,7 @@ public class SwingControl {
 
     public void logoutClient(LogoutMessageClient logoutMessageClient) {
         String nameClient = logoutMessageClient.getNameClient();
-        textArea.append("Client " + nameClient + " logout");
+        addInTextAread("Client " + nameClient + " logout");
         comboBox.removeItem(nameClient);
     }
 

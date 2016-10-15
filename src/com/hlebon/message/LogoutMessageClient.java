@@ -10,7 +10,6 @@ public class LogoutMessageClient extends Message {
     }
 
     public String getNameClient() {
-
         return nameClient;
     }
 }

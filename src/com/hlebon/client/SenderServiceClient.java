@@ -2,7 +2,6 @@ package com.hlebon.client;
 
 
 import com.hlebon.Constance;
-import com.hlebon.UtilsMethods;
 import com.hlebon.message.Message;
 import com.hlebon.server.Logger;
 
@@ -45,7 +44,7 @@ public class SenderServiceClient implements Runnable {
             Message message = queue.poll();
 
             try {
-                byte[] objectInByte = UtilsMethods.toByte(message);
+                byte[] objectInByte = message.toByte();
                 int length = objectInByte.length;
 
                 ByteBuffer byteBuffer = ByteBuffer.allocate(length + 1);

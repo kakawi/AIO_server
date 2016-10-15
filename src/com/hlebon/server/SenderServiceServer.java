@@ -2,7 +2,6 @@ package com.hlebon.server;
 
 
 import com.hlebon.Constance;
-import com.hlebon.UtilsMethods;
 import com.hlebon.message.*;
 
 import java.io.IOException;
@@ -81,7 +80,7 @@ public class SenderServiceServer implements Runnable {
             AsynchronousSocketChannel socket = messageWrapper.getFrom();
 
             try {
-                byte[] objectInByte = UtilsMethods.toByte(message);
+                byte[] objectInByte = message.toByte();
                 int length = objectInByte.length;
 
                 ByteBuffer byteBuffer = ByteBuffer.allocate(length + 1);
