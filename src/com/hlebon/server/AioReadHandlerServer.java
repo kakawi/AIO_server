@@ -1,7 +1,6 @@
 package com.hlebon.server;
 
 import com.hlebon.Constance;
-import com.hlebon.UtilsMethods;
 import com.hlebon.message.LogoutMessageServer;
 import com.hlebon.message.Message;
 import com.hlebon.message.MessageWrapper;
@@ -37,13 +36,10 @@ public class AioReadHandlerServer implements CompletionHandler<Integer,ByteBuffe
                     }
 
                     try {
-                        Object object = UtilsMethods.toObject(messageFromByte);
-                        if (object instanceof Message) {
-                            Message message = (Message) object;
-                            MessageWrapper messageWrapper = new MessageWrapper(message, socket);
-                            routeServiceServer.addMessageToHandle(messageWrapper);
-                            Logger.info("Got the message " + message);
-                        }
+                        Message message = Message.toObject(messageFromByte);
+                        MessageWrapper messageWrapper = new MessageWrapper(message, socket);
+                        routeServiceServer.addMessageToHandle(messageWrapper);
+                        Logger.info("Got the message " + message);
                         poolByte.clear();
                     } catch (IOException | ClassNotFoundException e) {
                         e.printStackTrace();
